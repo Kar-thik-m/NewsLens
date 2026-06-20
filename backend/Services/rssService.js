@@ -47,14 +47,33 @@ async function saveArticles(articles, source) {
 
             if (exists) continue;
 
+            let imageUrl = "";
+
+            // BBC / Media RSS
+            if (article["media:thumbnail"]) {
+                imageUrl = article["media:thumbnail"]["@_url"];
+            }
+
+            // Some feeds use media:content
+            if (!imageUrl && article["media:content"]) {
+                imageUrl = article["media:content"]["@_url"];
+            }
+
+            // Some feeds use enclosure
+            if (!imageUrl && article.enclosure) {
+                imageUrl = article.enclosure["@_url"];
+            }
+
             await Article.create({
                 title: article.title,
                 link: article.link,
                 source,
+                imageUrl,
                 publishedAt: article.pubDate
                     ? new Date(article.pubDate)
                     : new Date(),
             });
+
         } catch (error) {
             console.error("Error saving article:", error.message);
         }

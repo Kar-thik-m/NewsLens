@@ -68,7 +68,7 @@ async function saveArticles(articles, source) {
                 title: article.title,
                 link: article.link,
                 source,
-                imageUrl,
+                image: imageUrl,
                 publishedAt: article.pubDate
                     ? new Date(article.pubDate)
                     : new Date(),

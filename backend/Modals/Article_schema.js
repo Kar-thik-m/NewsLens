@@ -11,7 +11,10 @@ const articleSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
-        imageUrl: String,
+        image: {
+            type: String,
+
+        },
         source: {
             type: String,
             required: true,

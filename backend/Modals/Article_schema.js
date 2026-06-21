@@ -13,11 +13,15 @@ const articleSchema = new mongoose.Schema(
         },
         image: {
             type: String,
-
         },
         source: {
             type: String,
             required: true,
+        },
+        category: {
+            type: String,
+
+            index: true,
         },
         publishedAt: {
             type: Date,
@@ -27,5 +31,11 @@ const articleSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+
+// Compound index for efficient category + date sorting
+articleSchema.index({ category: 1, publishedAt: -1 });
+
+// Text index for full-text search on title
+articleSchema.index({ title: "text" });
 
 export default mongoose.model("Article", articleSchema);

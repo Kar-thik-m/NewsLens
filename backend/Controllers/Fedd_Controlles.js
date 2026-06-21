@@ -102,3 +102,21 @@ export const FilterCategory = async (req, res) => {
         });
     }
 };
+
+
+export const DeleteAllArticles = async (req, res) => {
+    try {
+        const result = await Article.deleteMany({});
+
+        res.status(200).json({
+            success: true,
+            message: "All articles deleted successfully",
+            deletedCount: result.deletedCount,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};

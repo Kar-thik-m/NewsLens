@@ -20,8 +20,7 @@ const articleSchema = new mongoose.Schema(
         },
         category: {
             type: String,
-
-            index: true,
+            required: true,
         },
         publishedAt: {
             type: Date,

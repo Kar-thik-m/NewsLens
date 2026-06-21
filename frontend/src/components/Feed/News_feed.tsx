@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_URL } from "../../ApiUrl";
 
 interface Article {
     _id: string;
@@ -7,6 +8,7 @@ interface Article {
     link: string;
     source: string;
     publishedAt: string;
+    image?: string;
 }
 
 interface NewsResponse {
@@ -25,13 +27,13 @@ const News_feed = () => {
             setError("");
 
             const response = await axios.get<NewsResponse>(
-                "http://localhost:5000/api/news"
+                `${API_URL}/api/news/get-news`
             );
 
             setNews(response.data.articles || []);
-        } catch (err) {
-            console.error(err);
-            setError("Failed to fetch news articles.");
+        } catch (error) {
+            console.error(error);
+            setError("Failed to fetch news articles");
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -49,101 +51,141 @@ const News_feed = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-100">
-                <div className="text-center">
-                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading latest news...</p>
+            <div className="min-h-screen bg-slate-100 p-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        {[...Array(6)].map((_, index) => (
+                            <div
+                                key={index}
+                                className="bg-white rounded-2xl overflow-hidden shadow animate-pulse"
+                            >
+                                <div className="h-56 bg-slate-200"></div>
+
+                                <div className="p-5">
+                                    <div className="h-4 bg-slate-200 rounded w-20 mb-4"></div>
+
+                                    <div className="h-5 bg-slate-200 rounded mb-2"></div>
+                                    <div className="h-5 bg-slate-200 rounded mb-2"></div>
+                                    <div className="h-5 bg-slate-200 rounded w-2/3"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-100 py-8 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50 py-10 px-4">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-                    <h1 className="text-4xl font-bold text-slate-800">
-                        📰 Latest News Feed
-                    </h1>
+                <div className="mb-10 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 className="text-5xl font-extrabold text-slate-900">
+                            📰 Latest News
+                        </h1>
+
+                        <p className="text-gray-500 mt-2">
+                            Stay updated with the latest headlines
+                        </p>
+                    </div>
 
                     <button
                         onClick={handleRefresh}
                         disabled={refreshing}
-                        className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                        className="bg-slate-900 text-white px-6 py-3 rounded-xl hover:bg-slate-800 transition disabled:opacity-50"
                     >
-                        {refreshing ? "Refreshing..." : "Refresh"}
+                        {refreshing ? "Refreshing..." : "Refresh Feed"}
                     </button>
                 </div>
 
                 {/* Error */}
                 {error && (
-                    <div className="mb-6 p-4 rounded-lg bg-red-100 text-red-600 border border-red-200">
+                    <div className="mb-6 rounded-xl border border-red-200 bg-red-100 p-4 text-red-600">
                         {error}
                     </div>
                 )}
 
+                {/* Count */}
+                {!error && (
+                    <div className="mb-8">
+                        <span className="bg-white px-4 py-2 rounded-full shadow text-slate-700 font-medium">
+                            Total Articles: {news.length}
+                        </span>
+                    </div>
+                )}
+
                 {/* Empty State */}
-                {news.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow p-10 text-center">
-                        <h2 className="text-xl font-semibold text-gray-700">
+                {news.length === 0 && !loading ? (
+                    <div className="bg-white rounded-2xl shadow p-12 text-center">
+                        <h2 className="text-2xl font-semibold text-slate-700">
                             No Articles Found
                         </h2>
-                        <p className="text-gray-500 mt-2">
-                            News articles will appear here once feeds are fetched.
+
+                        <p className="mt-2 text-gray-500">
+                            Articles will appear here when available.
                         </p>
                     </div>
                 ) : (
-                    <>
-                        {/* Count */}
-                        <p className="mb-6 text-gray-600">
-                            Total Articles:{" "}
-                            <span className="font-semibold">{news.length}</span>
-                        </p>
+                    <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                        {news.map((article) => (
+                            <article
+                                key={article._id}
+                                className="group overflow-hidden rounded-2xl bg-white shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                            >
+                                {/* Image */}
+                                <div className="relative h-56 overflow-hidden">
+                                    <img
+                                        src={
+                                            article.image ||
+                                            "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200"
+                                        }
+                                        alt={article.title}
+                                        className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        loading="lazy"
+                                    />
 
-                        {/* News Grid */}
-                        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                            {news.map((article) => (
-                                <div
-                                    key={article._id}
-                                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 flex flex-col"
-                                >
-                                    <div className="p-5 flex flex-col h-full">
-                                        {/* Source */}
-                                        <div className="flex justify-between items-center mb-3">
-                                            <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
-                                                {article.source}
-                                            </span>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
 
-                                            <span className="text-xs text-gray-500">
-                                                {new Date(
-                                                    article.publishedAt
-                                                ).toLocaleDateString()}
-                                            </span>
-                                        </div>
+                                    <div className="absolute top-3 left-3">
+                                        <span className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-slate-700">
+                                            {article.source}
+                                        </span>
+                                    </div>
+                                </div>
 
-                                        {/* Title */}
-                                        <h2 className="text-lg font-semibold text-gray-800 mb-4 line-clamp-3">
-                                            {article.title}
-                                        </h2>
+                                {/* Content */}
+                                <div className="p-5 flex flex-col min-h-[220px]">
+                                    <span className="text-sm text-gray-500 mb-3">
+                                        {new Date(
+                                            article.publishedAt
+                                        ).toLocaleDateString("en-IN", {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric",
+                                        })}
+                                    </span>
 
-                                        {/* Spacer */}
-                                        <div className="flex-grow"></div>
+                                    <h2 className="text-xl font-bold text-slate-800 line-clamp-3 mb-4">
+                                        {article.title}
+                                    </h2>
 
-                                        {/* Button */}
+                                    <div className="mt-auto">
                                         <a
                                             href={article.link}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="mt-4 text-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+                                            className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-800"
                                         >
-                                            Read Full Article →
+                                            Read Full Story
+                                            <span>→</span>
                                         </a>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </>
+                            </article>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>
